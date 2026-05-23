@@ -8,11 +8,11 @@
     
     <style>
         body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .admin-card { background: white; width: 500px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .admin-card { background: white; width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; box-sizing: border-box; }
-        .btn { background: #ea6903; color: white; width: 100%; padding: 10px; border: none; cursor: pointer; }
+        .btn { background: #ea6903; color: white; width: 48%; padding: 10px; border: none; cursor: pointer; }
         #appContent { display: none; }
-        .post-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
+        .post-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -22,14 +22,18 @@
         <h2>🔒 КИРИШ</h2>
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Парол">
-        <button class="btn" onclick="checkLogin()">КИРИШ</button>
+        <button class="btn" style="width:100%" onclick="checkLogin()">КИРИШ</button>
     </div>
 
     <div id="appContent">
-        <h2>✍️ МАЪЛУМОТЛАРНИ БОШҚАРИШ</h2>
+        <div style="display:flex; justify-content:space-between;">
+            <h2>✍️ БОШҚАРУВ</h2>
+            <button onclick="location.reload()" style="background:gray; color:white; border:none; cursor:pointer;">Чиқиш</button>
+        </div>
+        <input type="hidden" id="editId">
         <input type="text" id="title" placeholder="Сарлавҳа...">
         <textarea id="text" placeholder="Матн..."></textarea>
-        <button class="btn" onclick="saveData()">ҚЎШИШ</button>
+        <button class="btn" id="saveBtn" onclick="saveData()">ҚЎШИШ</button>
         <div id="postList"></div>
     </div>
 </div>
@@ -43,7 +47,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Парол текшируви
     function checkLogin() {
         if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
            document.getElementById('password').value === "Unitedpirs") {
@@ -53,7 +56,6 @@
         } else { alert("Парол нотўғри!"); }
     }
 
-    // Рўйхатни чиқариш
     function loadPosts() {
         db.ref('posts/news').on('value', (snapshot) => {
             const list = document.getElementById('postList');
@@ -62,19 +64,37 @@
                 list.innerHTML += `
                     <div class="post-item">
                         <span>${child.val().title}</span>
-                        <button onclick="deletePost('${child.key}')" style="background:red; color:white;">Ўчириш</button>
+                        <div>
+                            <button onclick="editPost('${child.key}', '${child.val().title}', '${child.val().text}')">Таҳрир</button>
+                            <button onclick="deletePost('${child.key}')" style="background:red; color:white;">Ўчириш</button>
+                        </div>
                     </div>`;
             });
         });
     }
 
-    window.deletePost = (id) => { if(confirm("Ўчирасизми?")) db.ref('posts/news/' + id).remove(); };
-    window.saveData = () => {
-        const t = document.getElementById('title').value;
-        const x = document.getElementById('text').value;
-        db.ref('posts/news').push({ title: t, text: x });
-        alert("Қўшилди!");
+    window.editPost = (id, title, text) => {
+        document.getElementById('editId').value = id;
+        document.getElementById('title').value = title;
+        document.getElementById('text').value = text;
+        document.getElementById('saveBtn').innerText = "Янгилаш";
     };
+
+    window.saveData = () => {
+        const id = document.getElementById('editId').value;
+        const data = { title: document.getElementById('title').value, text: document.getElementById('text').value };
+        if(id) {
+            db.ref('posts/news/' + id).update(data);
+            document.getElementById('saveBtn').innerText = "ҚЎШИШ";
+            document.getElementById('editId').value = '';
+        } else {
+            db.ref('posts/news').push(data);
+        }
+        document.getElementById('title').value = '';
+        document.getElementById('text').value = '';
+    };
+
+    window.deletePost = (id) => { if(confirm("Ўчирасизми?")) db.ref('posts/news/' + id).remove(); };
 </script>
 </body>
 </html>
