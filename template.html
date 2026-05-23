@@ -10,30 +10,37 @@
         <p id="description"></p>
     </div>
 
-    <script>
-        // 1. URL дан категорияни оламиз (масалан: template.html?category=news)
-        const params = new URLSearchParams(window.location.search);
-        const category = params.get('category');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, query, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-        // 2. Сизнинг ҳақиқий Google Script линкингиз (охирида /exec бўлиши шарт!)
-        const url = 'https://script.google.com/macros/s/AKfycbwlerJlUrrsRJlgGLwPHMVqZZXZ1sOaeIc0IUH9FXdvekixTFrk_-0ha08fd9Gd7_wsiA/exec?category=' + category;
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBwgzIw9TOFGLi3F80z9jOh6vIQhI8QBA",
+            authDomain: "freemans-4597e.firebaseapp.com",
+            projectId: "freemans-4597e",
+            databaseURL: "https://freemans-4597e-default-rtdb.firebaseio.com",
+            storageBucket: "freemans-4597e.firebasestorage.app",
+            messagingSenderId: "370678285596",
+            appId: "1:370678285596:web:a7232e47353305324466d9"
+        };
 
-        async function loadData() {
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                // Маълумотларни HTMLга жойлаймиз
-                document.getElementById('title').innerText = data.title;
-                document.getElementById('description').innerText = data.text;
-            } catch (error) {
-                console.error("Хатолик:", error);
-                document.getElementById('title').innerText = "Маълумот юклашда хатолик юз берди.";
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const category = new URLSearchParams(window.location.search).get('category') || 'news';
+        const postRef = query(ref(db, 'posts/' + category), limitToLast(1));
+
+        onValue(postRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                const key = Object.keys(data)[0];
+                const post = data[key];
+                document.getElementById('title').innerText = post.title;
+                document.getElementById('description').innerText = post.text;
+            } else {
+                document.getElementById('title').innerText = "Маълумот топилмади.";
             }
-        }
-
-        // 3. Саҳифа очилиши билан функцияни ишга туширамиз
-        loadData();
+        });
     </script>
 </body>
 </html>
