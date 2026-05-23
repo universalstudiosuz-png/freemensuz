@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - I Want Freedom</title>
+    <style>
+        body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .admin-card { background: white; width: 450px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn { background: #ea6903; color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #contentForm { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-card">
+        <div id="loginForm">
+            <h2>🔒 АДМИН ПАНЕЛ</h2>
+            <input type="email" id="email" placeholder="ЭЛЕКТРОН ПОЧТА">
+            <input type="password" id="password" placeholder="ПАРОЛЬ">
+            <button class="btn" onclick="checkLogin()">КИРИШ</button>
+            <a href="index.html" style="display:block; margin-top:10px; color:#ea6903; text-decoration:none;">🏠 БОШ САҲИФА</a>
+        </div>
+
+        <div id="contentForm">
+            <h2>✍️ МАЪЛУМОТ ҚЎШИШ</h2>
+            
+            <select id="category">
+                <option value="news">Новости / news</option>
+                <option value="research">Исследования / Тадқиқотлар</option>
+                <option value="articles">Статьи / Мақолалар</option>
+            </select>
+
+            <input type="text" id="title" placeholder="Сарлавҳани киритинг...">
+            <textarea id="text" placeholder="Матнни киритинг..." rows="4"></textarea>
+            <input type="file" id="image">
+            
+            <button class="btn" onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
+            <a href="index.html" style="display:block; margin-top:10px; color:#ea6903; text-decoration:none;">🏠 БОШ САҲИФА</a>
+        </div>
+    </div>
+
+    <script>
+    function checkLogin() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        if(email === "nicknoil@protonmail.com" && pass === "Unitedpirs") {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('contentForm').style.display = 'block';
+        } else {
+            alert("Электрон почта ёки парол нотўғри!");
+        }
+    }
+
+    function saveData() {
+        const data = {
+            category: document.getElementById('category').value,
+            title: document.getElementById('title').value,
+            content: document.getElementById('text').value
+        };
+        const webAppUrl = 'https://script.google.com/macros/s/AKfycbwlerJlUrrsRJlgGLwPHMVqZZXZ1sOaeIc0IUH9FXdvekixTFrk_-0ha08fd9Gd7_wsiA/exec';
+        
+        fetch(webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify(data)
+        }).then(() => alert("Маълумот жўнатилди!"));
+    }
+</script>
+</body>
+</html>

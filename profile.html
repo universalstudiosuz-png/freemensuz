@@ -1,0 +1,17 @@
+<div id="content">
+    <h1 id="title">Yuklanmoqda...</h1>
+    <p id="description"></p>
+</div>
+
+<script>
+    // Саҳифа очилганда URL дан кимлигини билиб олади
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get('name'); // urlayeva ёки davlatova
+
+    fetch('YOUR_WEB_APP_URL?category=' + category)
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('title').innerText = data[data.length-1][2]; // Энг охирги янгилик
+        document.getElementById('description').innerText = data[data.length-1][3];
+    });
+</script>

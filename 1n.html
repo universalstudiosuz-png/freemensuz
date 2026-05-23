@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>I Want Freedom</title>
+    <style>
+        /* Асосий дизайн */
+        body { font-family: sans-serif; margin: 0; padding: 0; background: #f0f2f5; }
+        header { background: #12303f; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* ADMIN тугмаси */
+        .admin-btn {
+            background: #ea6903;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        /* Тилни алмаштириш учун яширин/очиқ элементлар */
+        [data-lang="ru"] { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 data-lang="en">I Want Freedom</h1>
+    <h1 data-lang="ru">Я Хочу Свободу</h1>
+    
+    
+    <div>
+        <button onclick="switchLang('en')">EN</button>
+        <button onclick="switchLang('ru')">RU</button>
+        <a href="admin.html" class="admin-btn">Admin</a>
+    </div>
+</header>
+
+<script>
+    function switchLang(lang) {
+        document.querySelectorAll('[data-lang]').forEach(el => {
+            el.style.display = (el.getAttribute('data-lang') === lang) ? 'block' : 'none';
+        });
+    }
+</script>
+
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+</body>
+</html>
