@@ -5,87 +5,76 @@
     <title>Admin Panel - I Want Freedom</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-
+    
     <style>
         body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .admin-card { background: white; width: 450px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .btn { background: #ea6903; color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        #contentForm { display: none; }
+        .admin-card { background: white; width: 500px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; box-sizing: border-box; }
+        .btn { background: #ea6903; color: white; width: 100%; padding: 10px; border: none; cursor: pointer; }
+        #appContent { display: none; }
+        .post-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
-    <div class="admin-card">
-        <div id="loginForm">
-            <h2>🔒 АДМИН ПАНЕЛ</h2>
-            <input type="email" id="email" placeholder="ЭЛЕКТРОН ПОЧТА">
-            <input type="password" id="password" placeholder="ПАРОЛЬ">
-            <button class="btn" onclick="checkLogin()">КИРИШ</button>
-        </div>
-
-        <div id="contentForm">
-            <h2>✍️ МАЪЛУМОТ ҚЎШИШ</h2>
-            <select id="category">
-                <option value="news">Новости</option>
-                <option value="research">Исследования</option>
-            </select>
-            <input type="text" id="title" placeholder="Сарлавҳа...">
-            <textarea id="text" placeholder="Матн..." rows="4"></textarea>
-            <input type="file" id="imageInput">
-            <button class="btn" onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
-        </div>
+<div class="admin-card">
+    <div id="loginSection">
+        <h2>🔒 КИРИШ</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Парол">
+        <button class="btn" onclick="checkLogin()">КИРИШ</button>
     </div>
 
-    <script>
-        // Firebase конфигурацияси
-        const firebaseConfig = {
-            apiKey: "AIzaSyCBwgzIw9TOFGLi3F80z9jOh6vIQhI8QBA",
-            databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app",
-            storageBucket: "freemans-4597e.appspot.com",
-            projectId: "freemans-4597e"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const storage = firebase.storage();
+    <div id="appContent">
+        <h2>✍️ МАЪЛУМОТЛАРНИ БОШҚАРИШ</h2>
+        <input type="text" id="title" placeholder="Сарлавҳа...">
+        <textarea id="text" placeholder="Матн..."></textarea>
+        <button class="btn" onclick="saveData()">ҚЎШИШ</button>
+        <div id="postList"></div>
+    </div>
+</div>
 
-        function checkLogin() {
-            if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
-               document.getElementById('password').value === "Unitedpirs") {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('contentForm').style.display = 'block';
-            } else { alert("Парол нотўғри!"); }
-        }
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCBwgzIw9TOFGLi3F80z9jOh6vIQhI8QBA",
+        databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "freemans-4597e"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        async function saveData() {
-            const category = document.getElementById('category').value;
-            const title = document.getElementById('title').value;
-            const text = document.getElementById('text').value;
-            const file = document.getElementById('imageInput').files[0];
+    // Парол текшируви
+    function checkLogin() {
+        if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
+           document.getElementById('password').value === "Unitedpirs") {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('appContent').style.display = 'block';
+            loadPosts();
+        } else { alert("Парол нотўғри!"); }
+    }
 
-            if (!file) { alert("Расм танланг!"); return; }
+    // Рўйхатни чиқариш
+    function loadPosts() {
+        db.ref('posts/news').on('value', (snapshot) => {
+            const list = document.getElementById('postList');
+            list.innerHTML = '';
+            snapshot.forEach((child) => {
+                list.innerHTML += `
+                    <div class="post-item">
+                        <span>${child.val().title}</span>
+                        <button onclick="deletePost('${child.key}')" style="background:red; color:white;">Ўчириш</button>
+                    </div>`;
+            });
+        });
+    }
 
-            try {
-                // Расмни Storage'га юклаш
-                const storageRef = storage.ref('images/' + Date.now() + file.name);
-                await storageRef.put(file);
-                const imageUrl = await storageRef.getDownloadURL();
-
-                // Маълумотни Database'га сақлаш
-                await db.ref('posts/' + category).push({
-                    title: title,
-                    text: text,
-                    imageUrl: imageUrl,
-                    date: new Date().toLocaleDateString()
-                });
-                
-                alert("Муваффақиятли сақланди!");
-            } catch (err) {
-                alert("Хатолик: " + err.message);
-            }
-        }
-    </script>
+    window.deletePost = (id) => { if(confirm("Ўчирасизми?")) db.ref('posts/news/' + id).remove(); };
+    window.saveData = () => {
+        const t = document.getElementById('title').value;
+        const x = document.getElementById('text').value;
+        db.ref('posts/news').push({ title: t, text: x });
+        alert("Қўшилди!");
+    };
+</script>
 </body>
 </html>
