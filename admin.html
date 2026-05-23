@@ -1,52 +1,87 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <title>Professional Admin Panel</title>
+    <title>Admin Panel - I Want Freedom</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root { --primary: #2c3e50; --accent: #e67e22; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; }
-        .container { max-width: 800px; margin: 50px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; }
-        button { background: var(--primary); color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-delete { background: #e74c3c; }
-        .post-card { border: 1px solid #eee; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; align-items: center; }
-        .post-img { width: 80px; height: 80px; object-fit: cover; margin-right: 15px; }
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #ea6903; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; margin-top: 10px; }
+        #adminSection { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container" id="app">
+<div class="container">
     <div id="loginSection">
         <h2>🔒 Тизимга кириш</h2>
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Парол">
-        <button onclick="checkLogin()">Кириш</button>
+        <button onclick="checkLogin()">КИРИШ</button>
     </div>
 
- <select id="category">
-    <option value="urlaeva">Елена Урлаева</option>
-    <option value="davlatova">Давлатова</option>
-    <option value="noland">Ник Ноланд</option>
-</select>
+    <div id="adminSection">
+        <h2>✍️ Маълумот қўшиш</h2>
+        <select id="category">
+            <option value="urlaeva">Елена Урлаева</option>
+            <option value="davlatova">Давлатова</option>
+            <option value="noland">Ник Ноланд</option>
+        </select>
+        <input type="text" id="title" placeholder="Сарлавҳа...">
+        <textarea id="text" placeholder="Матн..."></textarea>
+        <input type="file" id="imgFile" accept="image/*">
+        <button id="saveBtn" onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
+        <button style="background:gray;" onclick="location.reload()">Чиқиш</button>
+    </div>
+</div>
 
 <script>
-    window.saveData = async () => {
-        const cat = document.getElementById('category').value; // Танланган шахс
-        const file = document.getElementById('imgFile').files[0];
-        const data = {
-            title: document.getElementById('title').value,
-            text: document.getElementById('text').value,
-            image: file ? await toBase64(file) : "",
-            date: new Date().toLocaleDateString()
-        };
-        // Танланган категорияга сақлаш
-        db.ref('posts/' + cat).push(data);
-        alert("Сақланди!");
-    };
+    const firebaseConfig = { databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Логин ва паролни текшириш
+    function checkLogin() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        
+        if(email === "nicknoil@protonmail.com" && pass === "Unitedpirs") {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('adminSection').style.display = 'block';
+        } else {
+            alert("Email ёки парол нотўғри!");
+        }
+    }
+
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    async function saveData() {
+        const cat = document.getElementById('category').value;
+        const fileInput = document.getElementById('imgFile');
+        const title = document.getElementById('title').value;
+        const text = document.getElementById('text').value;
+
+        if(!title || !text) { alert("Маълумотларни тўлдиринг!"); return; }
+
+        let imageBase64 = "";
+        if (fileInput.files.length > 0) {
+            imageBase64 = await toBase64(fileInput.files[0]);
+        }
+
+        const data = { title, text, image: imageBase64 };
+        
+        db.ref('posts/' + cat).push(data)
+          .then(() => alert("Муваффақиятли сақланди!"))
+          .catch(err => alert("Хато: " + err));
+    }
 </script>
 </body>
 </html>
