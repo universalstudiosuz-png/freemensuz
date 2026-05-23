@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Новости</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .post-card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div id="postsList">Загрузка...</div>
+    <a href="index.html">Вернуться на главную</a>
+
+    <script>
+        const firebaseConfig = { databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app" };
+        firebase.initializeApp(firebaseConfig);
+        
+        // Бу ерда категорияни ўзгартиринг: 
+        // davlatova.html учун 'davlatova', noland.html учун 'noland'
+        const cat = window.location.pathname.includes('davlatova') ? 'davlatova' : 'noland';
+
+        firebase.database().ref('posts/' + cat).on('value', (s) => {
+            const list = document.getElementById('postsList');
+            list.innerHTML = '';
+            s.forEach(c => {
+                const p = c.val();
+                list.innerHTML += `<div class="post-card"><h2>${p.title}</h2><p>${p.text}</p></div>`;
+            });
+        });
+    </script>
+</body>
+</html>
