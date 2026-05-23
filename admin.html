@@ -3,76 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Panel - I Want Freedom</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCBwgzIw9TOFGLi3F80z9jOh6vIQhI8QBA",
-            databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app",
-            storageBucket: "freemans-4597e.appspot.com",
-            projectId: "freemans-4597e"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const storage = firebase.storage();
-
-        function checkLogin() {
-            if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
-               document.getElementById('password').value === "Unitedpirs") {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('contentForm').style.display = 'block';
-            } else { alert("Парол нотўғри!"); }
-        }
-
-        async function saveData() {
-            const category = document.getElementById('category').value;
-            const title = document.getElementById('title').value;
-            const text = document.getElementById('text').value;
-            const file = document.getElementById('imageInput').files[0];
-
-            if (!file) { alert("Илтимос, расм танланг!"); return; }
-
-            try {
-                // 1. Расмни юклаш
-                const storageRef = storage.ref('images/' + Date.now() + file.name);
-                await storageRef.put(file);
-                const imageUrl = await storageRef.getDownloadURL();
-
-                // 2. Базага ёзиш
-                await db.ref('posts/' + category).push({
-                    title: title,
-                    text: text,
-                    imageUrl: imageUrl,
-                    date: new Date().toLocaleDateString()
-                });
-                
-                alert("Муваффақиятли сақланди!");
-            } catch (err) {
-                console.error("Хатолик:", err);
-                alert("Хатолик: " + err.message);
-            }
-        }
-    </script>
+    <style>
+        /* Чиройли дизайн */
+        body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .admin-card { background: white; width: 450px; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn { background: #ea6903; color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .btn:hover { background: #d35400; }
+        #contentForm { display: none; }
+    </style>
 </head>
 <body>
-    <div id="loginForm">
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Парол">
-        <button onclick="checkLogin()">КИРИШ</button>
+
+    <div class="admin-card">
+        <div id="loginForm">
+            <h2>🔒 АДМИН ПАНЕЛ</h2>
+            <input type="email" id="email" placeholder="ЭЛЕКТРОН ПОЧТА">
+            <input type="password" id="password" placeholder="ПАРОЛЬ">
+            <button class="btn" onclick="checkLogin()">КИРИШ</button>
+        </div>
+
+        <div id="contentForm">
+            <h2>✍️ МАЪЛУМОТ ҚЎШИШ</h2>
+            <select id="category">
+                <option value="news">Новости</option>
+                <option value="research">Исследования</option>
+            </select>
+            <input type="text" id="title" placeholder="Сарлавҳа...">
+            <textarea id="text" placeholder="Матн..." rows="4"></textarea>
+            <input type="file" id="imageInput">
+            <button class="btn" onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
+        </div>
     </div>
 
-    <div id="contentForm" style="display:none;">
-        <select id="category">
-            <option value="news">Новости</option>
-            <option value="research">Исследования</option>
-        </select>
-        <input type="text" id="title" placeholder="Сарлавҳа...">
-        <textarea id="text" placeholder="Матн..."></textarea>
-        <input type="file" id="imageInput">
-        <button onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
-    </div>
+    <script>
+        function checkLogin() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            // Парол ва логин текшируви
+            if(email === "nicknoil@protonmail.com" && pass === "Unitedpirs") {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('contentForm').style.display = 'block';
+            } else {
+                alert("Парол нотўғри!");
+            }
+        }
+
+        function saveData() {
+            alert("Функция ишлашга тайёр! Энди Firebase уланишини тўғирлаймиз.");
+        }
+    </script>
 </body>
 </html>
