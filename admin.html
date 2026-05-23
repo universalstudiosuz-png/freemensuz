@@ -7,15 +7,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; }
-        button { background: #ea6903; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; margin-top: 10px; }
-        .post-item { border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; }
+        button { background: #ea6903; color: white; padding: 10px; border: none; cursor: pointer; margin: 5px; }
+        .post-item { border-bottom: 1px solid #ddd; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
         #adminSection { display: none; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div id="loginSection">
         <h2>🔒 Тизимга кириш</h2>
@@ -33,11 +32,9 @@
         </select>
         <input type="text" id="title" placeholder="Сарлавҳа...">
         <textarea id="text" placeholder="Матн..."></textarea>
-        <input type="file" id="imgFile" accept="image/*">
         <button onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
-        
+        <button style="background:gray;" onclick="location.reload()">ЧИҚИШ (LOGOUT)</button>
         <hr>
-        <h3>📊 Мавжуд постлар</h3>
         <div id="postsList"></div>
     </div>
 </div>
@@ -48,27 +45,18 @@
     const db = firebase.database();
 
     function checkLogin() {
-        if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
-           document.getElementById('password').value === "Unitedpirs") {
+        if(document.getElementById('email').value === "nicknoil@protonmail.com" && document.getElementById('password').value === "Unitedpirs") {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('adminSection').style.display = 'block';
             loadPosts();
         } else { alert("Хато!"); }
     }
 
-    async function saveData() {
+    function saveData() {
         const cat = document.getElementById('category').value;
         const title = document.getElementById('title').value;
         const text = document.getElementById('text').value;
-        const file = document.getElementById('imgFile').files[0];
-        
-        let imageBase64 = "";
-        if (file) {
-            const reader = new FileReader();
-            imageBase64 = await new Promise(r => { reader.onload = () => r(reader.result); reader.readAsDataURL(file); });
-        }
-
-        db.ref('posts/' + cat).push({ title, text, image: imageBase64 });
+        db.ref('posts/' + cat).push({ title, text });
         alert("Сақланди!");
         loadPosts();
     }
@@ -81,20 +69,24 @@
             list.innerHTML = '';
             s.forEach(c => {
                 const p = c.val();
-                const div = document.createElement('div');
-                div.className = 'post-item';
-                div.innerHTML = `<span>${p.title}</span> 
-                                 <button style="background:red; width:80px;" onclick="deletePost('${cat}', '${c.key}')">Ўчириш</button>`;
-                list.appendChild(div);
+                list.innerHTML += `<div class="post-item">
+                    <span>${p.title}</span>
+                    <div>
+                        <button onclick="editPost('${cat}', '${c.key}', '${p.title}', '${p.text}')">Таҳрирлаш</button>
+                        <button style="background:red;" onclick="deletePost('${cat}', '${c.key}')">Ўчириш</button>
+                    </div>
+                </div>`;
             });
         });
     }
 
-    function deletePost(cat, id) {
-        if(confirm("Ростан ҳам ўчирмоқчимисиз?")) {
-            db.ref('posts/' + cat + '/' + id).remove();
-        }
+    function editPost(cat, id, oldTitle, oldText) {
+        const newTitle = prompt("Янги сарлавҳа:", oldTitle);
+        const newText = prompt("Янги матн:", oldText);
+        if(newTitle && newText) db.ref('posts/' + cat + '/' + id).update({ title: newTitle, text: newText });
     }
+
+    function deletePost(cat, id) { if(confirm("Ўчирасизми?")) db.ref('posts/' + cat + '/' + id).remove(); }
 </script>
 </body>
 </html>
