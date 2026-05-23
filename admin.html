@@ -5,31 +5,45 @@
     <title>Admin Panel - I Want Freedom</title>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getDatabase, ref as dbRef, push, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getStorage, ref as stRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCBwgzIw9TOFGLi3F80z9jOh6vIQhI8QBA",
             authDomain: "freemans-4597e.firebaseapp.com",
             projectId: "freemans-4597e",
-           databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app",
-            storageBucket: "freemans-4597e.firebasestorage.app",
+            databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app",
+            storageBucket: "freemans-4597e.appspot.com",
             messagingSenderId: "370678285596",
             appId: "1:370678285596:web:a7232e47353305324466d9"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const storage = getStorage(app);
 
-        // Функцияларни глобал қилиш (window га бириктириш)
-        window.saveData = function() {
+        window.saveData = async function() {
             const category = document.getElementById('category').value;
             const title = document.getElementById('title').value;
             const text = document.getElementById('text').value;
+            const fileInput = document.getElementById('imageInput');
+            
+            let imageUrl = "";
 
-            const newPostRef = push(ref(db, 'posts/' + category));
+            // 1. Агар файл танланган бўлса, Storage'га юклаш
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const storageRef = stRef(storage, 'images/' + file.name);
+                const snapshot = await uploadBytes(storageRef, file);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+
+            // 2. Database'га сақлаш
+            const newPostRef = push(dbRef(db, 'posts/' + category));
             set(newPostRef, {
                 title: title,
                 text: text,
+                imageUrl: imageUrl, // Расм линки
                 date: new Date().toLocaleDateString()
             }).then(() => alert("Муваффақиятли сақланди!"))
               .catch(err => alert("Хато: " + err.message));
@@ -44,14 +58,12 @@
     </style>
 </head>
 <body>
-
     <div class="admin-card">
         <div id="loginForm">
             <h2>🔒 АДМИН ПАНЕЛ</h2>
             <input type="email" id="email" placeholder="ЭЛЕКТРОН ПОЧТА">
             <input type="password" id="password" placeholder="ПАРОЛЬ">
             <button class="btn" onclick="checkLogin()">КИРИШ</button>
-            <a href="index.html" class="btn">Главная страница</a>
         </div>
 
         <div id="contentForm">
@@ -63,20 +75,18 @@
             </select>
             <input type="text" id="title" placeholder="Сарлавҳа...">
             <textarea id="text" placeholder="Матн..." rows="4"></textarea>
+            <input type="file" id="imageInput" accept="image/*">
             <button class="btn" onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
         </div>
     </div>
 
     <script>
         function checkLogin() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            if(email === "nicknoil@protonmail.com" && pass === "Unitedpirs") {
+            if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
+               document.getElementById('password').value === "Unitedpirs") {
                 document.getElementById('loginForm').style.display = 'none';
                 document.getElementById('contentForm').style.display = 'block';
-            } else {
-                alert("Парол нотўғри!");
-            }
+            } else { alert("Парол нотўғри!"); }
         }
     </script>
 </body>
