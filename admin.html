@@ -5,12 +5,12 @@
     <title>Admin Panel - I Want Freedom</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
     <style>
-        body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
         .admin-card { background: white; width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; box-sizing: border-box; }
-        .btn { background: #ea6903; color: white; width: 48%; padding: 10px; border: none; cursor: pointer; }
+        .btn { background: #ea6903; color: white; width: 100%; padding: 10px; border: none; cursor: pointer; }
         #appContent { display: none; }
         .post-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
     </style>
@@ -22,7 +22,7 @@
         <h2>🔒 КИРИШ</h2>
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Парол">
-        <button class="btn" style="width:100%" onclick="checkLogin()">КИРИШ</button>
+        <button class="btn" onclick="checkLogin()">КИРИШ</button>
     </div>
 
     <div id="appContent">
@@ -33,6 +33,7 @@
         <input type="hidden" id="editId">
         <input type="text" id="title" placeholder="Сарлавҳа...">
         <textarea id="text" placeholder="Матн..."></textarea>
+        <input type="file" id="imageInput">
         <button class="btn" id="saveBtn" onclick="saveData()">ҚЎШИШ</button>
         <div id="postList"></div>
     </div>
@@ -42,10 +43,12 @@
     const firebaseConfig = {
         apiKey: "AIzaSyCBwgzIw9TOFGLi3F80z9jOh6vIQhI8QBA",
         databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app",
+        storageBucket: "freemans-4597e.appspot.com",
         projectId: "freemans-4597e"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const storage = firebase.storage();
 
     function checkLogin() {
         if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
@@ -61,13 +64,14 @@
             const list = document.getElementById('postList');
             list.innerHTML = '';
             snapshot.forEach((child) => {
+                const post = child.val();
+                const id = child.key;
+                // Тирноқчалар муаммосини ҳал қилиш учун кодни ўзгартирдим
+                const editBtn = `<button onclick="editPost('${id}', \`${post.title.replace(/'/g, "\\'")}\`, \`${post.text.replace(/'/g, "\\'")}\`)">Таҳрир</button>`;
                 list.innerHTML += `
                     <div class="post-item">
-                        <span>${child.val().title}</span>
-                        <div>
-                            <button onclick="editPost('${child.key}', '${child.val().title}', '${child.val().text}')">Таҳрир</button>
-                            <button onclick="deletePost('${child.key}')" style="background:red; color:white;">Ўчириш</button>
-                        </div>
+                        <span>${post.title}</span>
+                        <div>${editBtn} <button onclick="deletePost('${id}')" style="background:red; color:white;">Ўчириш</button></div>
                     </div>`;
             });
         });
@@ -80,9 +84,20 @@
         document.getElementById('saveBtn').innerText = "Янгилаш";
     };
 
-    window.saveData = () => {
+    window.saveData = async () => {
         const id = document.getElementById('editId').value;
-        const data = { title: document.getElementById('title').value, text: document.getElementById('text').value };
+        const file = document.getElementById('imageInput').files[0];
+        const title = document.getElementById('title').value;
+        const text = document.getElementById('text').value;
+
+        let imageUrl = "";
+        if (file) {
+            const ref = storage.ref('images/' + Date.now() + file.name);
+            await ref.put(file);
+            imageUrl = await ref.getDownloadURL();
+        }
+
+        const data = { title, text, imageUrl: imageUrl || "" };
         if(id) {
             db.ref('posts/news/' + id).update(data);
             document.getElementById('saveBtn').innerText = "ҚЎШИШ";
@@ -92,6 +107,7 @@
         }
         document.getElementById('title').value = '';
         document.getElementById('text').value = '';
+        document.getElementById('imageInput').value = '';
     };
 
     window.deletePost = (id) => { if(confirm("Ўчирасизми?")) db.ref('posts/news/' + id).remove(); };
