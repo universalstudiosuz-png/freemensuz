@@ -27,78 +27,26 @@
         <button onclick="checkLogin()">Кириш</button>
     </div>
 
-    <div id="adminContent" style="display:none;">
-        <div class="header">
-            <h2>✍️ Маълумотларни бошқариш</h2>
-            <button onclick="location.reload()" class="btn-delete">Чиқиш</button>
-        </div>
-        <input type="hidden" id="editId">
-        <input type="text" id="title" placeholder="Сарлавҳа...">
-        <textarea id="text" placeholder="Матн..."></textarea>
-        <input type="file" id="imgFile" accept="image/*">
-        <button id="saveBtn" onclick="saveData()">Сақлаш</button>
-        <div id="postList"></div>
-    </div>
-</div>
+ <select id="category">
+    <option value="urlaeva">Елена Урлаева</option>
+    <option value="davlatova">Давлатова</option>
+    <option value="noland">Ник Ноланд</option>
+</select>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    function checkLogin() {
-        if(document.getElementById('email').value === "nicknoil@protonmail.com" && 
-           document.getElementById('password').value === "Unitedpirs") {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('adminContent').style.display = 'block';
-            loadPosts();
-        } else alert("Хато!");
-    }
-
-    // Расмни Base64 га ўгириш (CORS муаммосини ечиш учун)
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-
-    async function saveData() {
+    window.saveData = async () => {
+        const cat = document.getElementById('category').value; // Танланган шахс
         const file = document.getElementById('imgFile').files[0];
         const data = {
             title: document.getElementById('title').value,
             text: document.getElementById('text').value,
-            image: file ? await toBase64(file) : ""
+            image: file ? await toBase64(file) : "",
+            date: new Date().toLocaleDateString()
         };
-        const id = document.getElementById('editId').value;
-        id ? db.ref('posts/news/' + id).update(data) : db.ref('posts/news').push(data);
-        alert("Бажарилди!");
-    }
-
-    function loadPosts() {
-        db.ref('posts/news').on('value', (s) => {
-            let html = '';
-            s.forEach(c => {
-                const p = c.val();
-                html += `<div class="post-card">
-                    <img src="${p.image}" class="post-img">
-                    <div>
-                        <h3>${p.title}</h3>
-                        <button onclick="editPost('${c.key}', '${p.title}', '${p.text}')">Таҳрир</button>
-                        <button onclick="db.ref('posts/news/${c.key}').remove()" class="btn-delete">Ўчириш</button>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('postList').innerHTML = html;
-        });
-    }
-
-    function editPost(id, t, txt) {
-        document.getElementById('editId').value = id;
-        document.getElementById('title').value = t;
-        document.getElementById('text').value = txt;
-        document.getElementById('saveBtn').innerText = "Янгилаш";
-    }
+        // Танланган категорияга сақлаш
+        db.ref('posts/' + cat).push(data);
+        alert("Сақланди!");
+    };
 </script>
 </body>
 </html>
