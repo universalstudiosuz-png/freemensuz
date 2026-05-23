@@ -1,24 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="uz">
 <head>
+    <meta charset="UTF-8">
     <title>Profile Page</title>
 </head>
 <body>
     <div id="content">
-        <h1 id="title">Loading...</h1>
-        <img id="profileImage" src="" width="300">
+        <h1 id="title">Юкланмоқда...</h1>
         <p id="description"></p>
     </div>
 
     <script>
-        // Бу скрипт Google Sheets дан маълумотни олиб келади
-        async function loadData(category) {
-            const response = await fetch('YOUR_GOOGLE_APPS_SCRIPT_URL?category=' + category);
-            const data = await response.json();
-            document.getElementById('title').innerText = data.title;
-            document.getElementById('description').innerText = data.text;
-            document.getElementById('profileImage').src = data.imageUrl;
+        // 1. URL дан категорияни оламиз (масалан: template.html?category=news)
+        const params = new URLSearchParams(window.location.search);
+        const category = params.get('category');
+
+        // 2. Сизнинг ҳақиқий Google Script линкингиз (охирида /exec бўлиши шарт!)
+        const url = 'https://script.google.com/macros/s/AKfycbwlerJlUrrsRJlgGLwPHMVqZZXZ1sOaeIc0IUH9FXdvekixTFrk_-0ha08fd9Gd7_wsiA/exec?category=' + category;
+
+        async function loadData() {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Маълумотларни HTMLга жойлаймиз
+                document.getElementById('title').innerText = data.title;
+                document.getElementById('description').innerText = data.text;
+            } catch (error) {
+                console.error("Хатолик:", error);
+                document.getElementById('title').innerText = "Маълумот юклашда хатолик юз берди.";
+            }
         }
+
+        // 3. Саҳифа очилиши билан функцияни ишга туширамиз
+        loadData();
     </script>
 </body>
 </html>
