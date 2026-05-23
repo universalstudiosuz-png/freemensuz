@@ -3,138 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <title>I Want Freedom</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-
- 
-    /* Асосий меню контейнери */
-    .dropdown { position: relative; display: inline-block; }
-    
-    /* "Monitoring" менюси ёзуви */
-    .dropbtn { 
-        color: gold; font-weight: bold; cursor: pointer; font-size: 16px; 
-        text-decoration: none; padding: 10px;
-    }
-    
-    /* Дропдавн мазмуни (дастлаб яширин) */
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: #f9f9f9;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
-        z-index: 1;
-        border-radius: 5px;
-    }
-    
-    /* Дропдавн ҳаволалари */
-    .dropdown-content a {
-        color: black;
-        padding: 12px 16px;
-        text-decoration: none;
-        display: block;
-    }
-    
-    .dropdown-content a:hover { background-color: #ddd; }
-    
-    /* Сичқонча борганда очиш */
-    .dropdown:hover .dropdown-content { display: block; }
- 
-        /* Асосий дизайн */
         body { font-family: sans-serif; margin: 0; padding: 0; background: #f0f2f5; }
         header { background: #24724b; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { color: gold; font-weight: bold; cursor: pointer; font-size: 16px; text-decoration: none; padding: 10px; }
+        .dropdown-content { display: none; position: absolute; background: #f9f9f9; min-width: 160px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 1; border-radius: 5px; }
+        .dropdown-content a { color: black; padding: 12px 16px; text-decoration: none; display: block; }
+        .dropdown:hover .dropdown-content { display: block; }
         
-        /* Логотип дизайни */
-        .free img {
-            border-radius: 50%;
-            border: 3px solid red;
-            box-shadow: 3px 5px 8px rgba(0,0,0,0.3);
-        }
-        
-        /* Меню дизайни */
-        .menu-btn { display: flex; gap: 15px; }
-        .menu-btn a {
-            text-decoration: none;
-            font-size: 16px;
-            color: black;
-            font-weight: bold;
-        }
-        
-        /* Admin тугмаси */
-        .admin-btn {
-            background: #ea6903;
-            color: white;
-            padding: 8px 15px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        
-        /* Тил алмаштириш */
-        [data-lang="ru"] { display: none; }
+        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="free">
-        <img src="logo.jpg" alt="log" width="100" height="100">
-    </div>
-
+    <div class="free"><img src="logo.jpg" alt="log" width="100" height="100" style="border-radius:50%; border:3px solid red;"></div>
     <div>
         <h1 data-lang="en">I Want Freedom</h1>
-        <h1 data-lang="ru">Я Хочу Свободу</h1>
+        <h1 data-lang="ru" style="display:none;">Я Хочу Свободу</h1>
     </div>
-
- 
-
-<nav class="menu-btn">
-    <div class="dropdown">
-        <a href="#" class="dropbtn">Monitoring ▼</a>
-        <div class="dropdown-content">
-            <a href="template.html">Elena Urlaeva</a>
-            <a href="template.html">Tatyana Davlatova</a>
-            <a href="template.html">Nick Noland</a>
+    <nav>
+        <div class="dropdown">
+            <a href="#" class="dropbtn">Monitoring ▼</a>
+            <div class="dropdown-content">
+                <a href="urlaeva.html">Elena Urlaeva</a>
+                <a href="davlatova.html">Tatyana Davlatova</a>
+                <a href="noland.html">Nick Noland</a>
+            </div>
         </div>
-    </div>
-</nav>
-    
+    </nav>
     <div>
         <button onclick="switchLang('en')">EN</button>
         <button onclick="switchLang('ru')">RU</button>
-        <a href="admin.html" class="admin-btn">Admin</a>
+        <a href="admin.html" style="background:#ea6903; color:white; padding:8px 15px; text-decoration:none; border-radius:5px;">Admin</a>
     </div>
 </header>
 
+<div class="main-grid" id="mainGrid"></div>
+
 <script>
+    // Firebase уланиши
+    const firebaseConfig = {
+        databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Маълумотларни чиқариш
+    ['urlaeva', 'davlatova', 'noland'].forEach(cat => {
+        db.ref('posts/' + cat).on('value', (s) => {
+            s.forEach(c => {
+                const p = c.val();
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    ${p.image ? `<img src="${p.image}">` : ''}
+                    <h4>${p.title}</h4>
+                    <a href="${cat}.html">Ўтиш</a>
+                `;
+                document.getElementById('mainGrid').appendChild(card);
+            });
+        });
+    });
+
     function switchLang(lang) {
         document.querySelectorAll('[data-lang]').forEach(el => {
             el.style.display = (el.getAttribute('data-lang') === lang) ? 'block' : 'none';
         });
     }
-    function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var rows = sheet.getDataRange().getValues();
-  var category = e.parameter.category;
-  
-  // Энг охирги қаторни топиш
-  var lastRow = rows[rows.length - 1]; 
-  
-  var result = {
-    title: lastRow[1], // Сарлавҳа устуни
-    text: lastRow[2]    // Матн устуни
-  };
-  
-  return ContentService.createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  sheet.appendRow([data.category, data.title, data.content]);
-  return ContentService.createTextOutput("Success");
-}
 </script>
 
 </body>

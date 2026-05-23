@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Елена Урлаева - Блог</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; }
+        .container { max-width: 1000px; margin: auto; display: flex; padding: 20px; gap: 20px; }
+        .main-content { flex: 3; }
+        .sidebar { flex: 1; background: white; padding: 20px; border-radius: 8px; height: fit-content; }
+        .post-card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .post-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 5px; }
+        .btn-read { display: inline-block; padding: 10px; background: #ea6903; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="main-content">
+        <h1>Елена Урлаева янгиликлари</h1>
+        <div id="postsList">Маълумотлар юкланмоқда...</div>
+    </div>
+    
+    <aside class="sidebar">
+        <h3>Тавсиф</h3>
+        <p>Бу саҳифада Елена Урлаевага оид барча сўнгги янгиликлар ва воқеалар ёритиб борилади.</p>
+    </aside>
+</div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://freemans-4597e-default-rtdb.europe-west1.firebasedatabase.app" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // "urlaeva" категориясини олиш
+    db.ref('posts/urlaeva').on('value', (s) => {
+        const list = document.getElementById('postsList');
+        list.innerHTML = '';
+        s.forEach(c => {
+            const p = c.val();
+            list.innerHTML += `
+                <div class="post-card">
+                    ${p.image ? `<img src="${p.image}">` : ''}
+                    <h3>${p.title}</h3>
+                    <p>${p.text.length > 100 ? p.text.substring(0, 100) + '...' : p.text}</p>
+                    <a href="post.html?id=${c.key}&cat=urlaeva" class="btn-read">Батафсил ўқиш</a>
+                </div>
+            `;
+        });
+    });
+</script>
+</body>
+</html>
