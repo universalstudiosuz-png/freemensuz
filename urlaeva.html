@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Елена Урлаева - Блог</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        
+        /* Асосий контейнер (2 та устун) */
+        .container { max-width: 1000px; margin: auto; display: flex; gap: 30px; }
+        
+        /* Чап томон: Мақолалар */
+        .main-content { flex: 2; }
+        .post-card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .post-card img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 5px; }
+        
+        /* Ўнг томон: Тавсиф (Sidebar) */
+        .sidebar { flex: 1; background: #fff; padding: 20px; border-radius: 10px; height: fit-content; border: 1px solid #ddd; position: sticky; top: 20px; }
+        
+        h1 { color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="main-content">
+        <h1>Елена Урлаева янгиликлари</h1>
+        <div id="postsList">
+            <div class="post-card">
+                <img src="https://images.unsplash.com/photo-1589998059171-988d887dfa46?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Rasmi">
+                <h2>Суд ишларидаги коррупция</h2>
+                <p>Бу ерда мақоланинг тўлиқ матни бўлади...</p>
+            </div>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <h3>Ҳуқуқ ҳимоячиси ҳақида</h3>
+        <p>Елена Урлаева - инсон ҳуқуқлари фаоли. Ушбу саҳифада унинг барча ҳисоботлари ва видеоларини кузатиб боришингиз мумкин.</p>
+        <hr>
+        <a href="index.html">Бош саҳифага қайтиш</a>
+    </aside>
+</div>
+
+</body>
+</html>
