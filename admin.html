@@ -10,22 +10,9 @@
         .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; }
         input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; }
         button { background: #ea6903; color: white; padding: 10px; border: none; cursor: pointer; margin: 5px; }
-        .post-item { border-bottom: 1px solid #ddd; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .post-item { border-bottom: 1px solid #ddd; padding: 15px; }
         #adminSection { display: none; }
-        .container a{
-            text-align: center;
-            text-decoration: solid;
-            font-family: Georgia, 'Times New Roman', Times, serif;
-            font-size: 16px;
-            color: red;
-        }
-        .adminSection a{
-              text-align: center;
-            text-decoration: solid;
-            font-family: Georgia, 'Times New Roman', Times, serif;
-            font-size: 16px;
-            color: red;
-        }
+        .edit-area { background: #f9f9f9; padding: 10px; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -34,12 +21,11 @@
         <h2>🔒 Тизимга кириш</h2>
         <input type="email" id="email" placeholder="Email">
         <input type="password" id="password" placeholder="Парол">
-        <button onclick="checkLogin()">КИРИШ</button><br>
-        <a href="index.html" class="btn"> Главная страница</a>
+        <button onclick="checkLogin()">КИРИШ</button>
     </div>
 
     <div id="adminSection">
-        <a href="index.html" class="btn"> выход</a>
+        <a href="index.html">⬅️ Главная страница</a>
         <h2>✍️ Маълумот қўшиш</h2>
         <select id="category" onchange="loadPosts()">
             <option value="urlaeva">Елена Урлаева</option>
@@ -49,7 +35,7 @@
         <input type="text" id="title" placeholder="Сарлавҳа...">
         <textarea id="text" placeholder="Матн..."></textarea>
         <button onclick="saveData()">САЙТГА ЖЎНАТИШ</button>
-        <button style="background:gray;" onclick="location.reload()">ЧИҚИШ (LOGOUT)</button>
+        <button style="background:gray;" onclick="location.reload()">ЧИҚИШ</button>
         <hr>
         <div id="postsList"></div>
     </div>
@@ -72,34 +58,44 @@
         const cat = document.getElementById('category').value;
         const title = document.getElementById('title').value;
         const text = document.getElementById('text').value;
+        if(!title || !text) return alert("Маълумотларни тўлдиринг!");
         db.ref('posts/' + cat).push({ title, text });
         alert("Сақланди!");
+        document.getElementById('title').value = '';
+        document.getElementById('text').value = '';
         loadPosts();
     }
 
     function loadPosts() {
         const cat = document.getElementById('category').value;
         const list = document.getElementById('postsList');
-        list.innerHTML = '';
         db.ref('posts/' + cat).on('value', (s) => {
             list.innerHTML = '';
             s.forEach(c => {
                 const p = c.val();
-                list.innerHTML += `<div class="post-item">
-                    <span>${p.title}</span>
-                    <div>
-                        <button onclick="editPost('${cat}', '${c.key}', '${p.title}', '${p.text}')">Таҳрирлаш</button>
-                        <button style="background:red;" onclick="deletePost('${cat}', '${c.key}')">Ўчириш</button>
+                const id = c.key;
+                const div = document.createElement('div');
+                div.className = 'post-item';
+                div.innerHTML = `
+                    <strong>${p.title}</strong><br>
+                    <button onclick="document.getElementById('edit-${id}').style.display='block'">Таҳрирлаш</button>
+                    <button style="background:red;" onclick="deletePost('${cat}', '${id}')">Ўчириш</button>
+                    <div id="edit-${id}" class="edit-area">
+                        <input type="text" id="newTitle-${id}" value="${p.title.replace(/"/g, '&quot;')}">
+                        <textarea id="newText-${id}">${p.text}</textarea>
+                        <button onclick="updatePost('${cat}', '${id}')">Сақлаш</button>
                     </div>
-                </div>`;
+                `;
+                list.appendChild(div);
             });
         });
     }
 
-    function editPost(cat, id, oldTitle, oldText) {
-        const newTitle = prompt("Янги сарлавҳа:", oldTitle);
-        const newText = prompt("Янги матн:", oldText);
-        if(newTitle && newText) db.ref('posts/' + cat + '/' + id).update({ title: newTitle, text: newText });
+    function updatePost(cat, id) {
+        const title = document.getElementById('newTitle-' + id).value;
+        const text = document.getElementById('newText-' + id).value;
+        db.ref('posts/' + cat + '/' + id).update({ title, text });
+        alert("Янгиланди!");
     }
 
     function deletePost(cat, id) { if(confirm("Ўчирасизми?")) db.ref('posts/' + cat + '/' + id).remove(); }
